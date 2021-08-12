@@ -45,9 +45,9 @@
 #define CALIBRATION_FACTOR 2500000 /* calibration factor for the load cell */
 
 /* create three new ToF sensor objects */
-Adafruit_VL6180X ToF1 = Adafruit_VL6180X();
-Adafruit_VL6180X ToF2 = Adafruit_VL6180X();
-Adafruit_VL6180X ToF3 = Adafruit_VL6180X();
+Adafruit_VL6180X ToF1;
+Adafruit_VL6180X ToF2;
+Adafruit_VL6180X ToF3;
 
 /* create new gripper and LMotor objects */
 Gripper gripper;
