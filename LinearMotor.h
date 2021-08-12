@@ -1,181 +1,181 @@
-// Linear Motor Control
-// NOTE: there is a safety limit defined in this file that 
-//       prevents applyong too much force on the loadcell
+/*  @file LinearMotor
+ *   
+ *  Description: This class initializes and controls the 
+ *               linear stepper motor. Note that there is a
+ *               safety limit defined in this file that 
+ *               prevents applying too much force on the 
+ *               loadcell. 
+ *               
+ *  To-Do: Implement acceleration profile:
+ *         CloseClaws(): Feedback control when force is within the optimal range 
+ *         OpenClaws(): Define number of steps to open claw to desired position
+ */
+/* include libraries */
+#include <HX711.h>
 
-#include "LoadCell.h"
+/* constants */
+#define OPEN_DIR 0
+#define CLOSE_DIR 1
+#define NUM_STEPS 5000             /* pre-determined number for steps for opening the claw */
+#define SAFETY_LIMIT 100           /* in kg, set to smaller value once we have the load cell properly calibrated */
+#define STEP_DELAY 25              /* in microseconds, decrease delay to increase speed */
+#define CALIBRATION_FACTOR 2500000 /* calibration factor for the load cell */
 
-// TODO: Implement Acceleration Profile
-//        CloseClaws(): Feedback control when gap>1cm
-//        OpenClaws(): Define number of steps
+class LinearMotor
+{
+  /* create load cell object */
+  HX711 loadCell;
 
+public:
+  /* variable declarations */
+  int openDirCheck = 1;  /* enable movement in opening direction */
+  int closeDirCheck = 1; /* enable movement in closing direction */
+  double appliedForce;
 
-// This class initialize and control the linear stepper motor
-class LinearMotor {
+  /* initializing the linear motor and load cell */
+  LinearMotor()
+  {
+    pinMode(STEP_PIN, OUTPUT);
+    pinMode(DIR_PIN, OUTPUT);
+    pinMode(ENABLE_PIN, OUTPUT);
+    digitalWrite(ENABLE_PIN, HIGH); /* disable motor */
 
-double SAFETY_LIMIT=100; //Kg
+    loadCell.begin(LOAD_CELL_DATA, LOAD_CELL_CLOCK);
+    loadCell.set_scale(CALIBRATION_FACTOR);
+    loadCell.tare(); /* tare scale to 0 */
+  }
 
-// Movement directions
-    int closeDir = 0;
-    int openDir = 1;
-    
-    int dirCheck1 = 1;
-    int dirCheck2 = 1;
-    
-// Step delay depends on the stepping mode    
-    int stepDelay = 25; // us: Decrease to increase speed
-    
-    LoadCell loadcell;
-    
-    double appliedForce;
-    double safetyMargin = 0.01;
-    double loadReading;
-  
-  public:
+  /* closes the claw until a certain input force (in kg) measured by the load cell */
+  void closeClaws(double force)
+  {
+    digitalWrite(DIR_PIN, CLOSE_DIR);
+    appliedForce = loadCell.get_units();
+    digitalWrite(ENABLE_PIN, LOW);
 
-   // Initializing the Linear Motor
-    LinearMotor() {
-      pinMode(STEP_PIN, OUTPUT);
-      pinMode(DIR_PIN , OUTPUT);
-      pinMode(ENABLE_PIN, OUTPUT);
-      digitalWrite (ENABLE_PIN, HIGH); // Disabling the motor
+    while (appliedForce < force && (appliedForce < SAFETY_LIMIT))
+    {
+      digitalWrite(STEP_PIN, HIGH);
+      delayMicroseconds(STEP_DELAY);
+      digitalWrite(STEP_PIN, LOW);
+      delayMicroseconds(STEP_DELAY);
+      appliedForce = loadCell.get_units();
     }
+    digitalWrite(ENABLE_PIN, HIGH);
+  }
 
-// This function closes the claw till the input force (in Kg) is applied
-
-    CloseClaws(double force) {
-      // Use TOF sensor for distance
-      // if the gap is larger, do speed control
-      int gap;
-      digitalWrite(DIR_PIN, closeDir);
-    
-      /*
-       * Need to work on this function 
-       * end-stop can also be used here (testing needed)
-        while (gap > 1) // gap greater than 1 cm
-        {
-          digitalWrite(ENABLE_PIN, LOW);
-          digitalWrite(STEP_PIN, HIGH);
-          delayMicroseconds(stepDelay);
-          digitalWrite(STEP_PIN, LOW);
-          delayMicroseconds(stepDelay);
-
-          // CHECK GAP
-
-        }
-      */
-
-      // else do step control
-
-      
-      appliedForce = loadcell.GetForce();
+  /* opens the claw by moving the motor an arbitrary number of steps (5000, here) */
+  /* further testing required to find the right number */
+  void openClaws()
+  {
+    int numSteps = 0;
+    if (openDirCheck == 1)
+    {
       digitalWrite(ENABLE_PIN, LOW);
-      while (appliedForce < force) { //Need to implement a safety margin
-        digitalWrite(STEP_PIN, HIGH);
-        delayMicroseconds(stepDelay);
-        digitalWrite(STEP_PIN, LOW);
-        //delayMicroseconds(stepDelay);
-        appliedForce = loadcell.GetForce();
+      digitalWrite(DIR_PIN, OPEN_DIR);
+
+      while (numSteps < NUM_STEPS)
+      {
+        numSteps++;
+        for (int i = 0; i < 10; i++)
+        {
+          digitalWrite(STEP_PIN, HIGH);
+          delayMicroseconds(STEP_DELAY);
+          digitalWrite(STEP_PIN, LOW);
+          delayMicroseconds(STEP_DELAY);
+        }
       }
       digitalWrite(ENABLE_PIN, HIGH);
     }
+  }
 
-// This function opens the claw by moving the moving the
-// motor an arbirary number of steps (20000, here). 
-//Testing needed to find the right number
-  
-    void OpenClaws() {
-      int numSteps;
-      if (dirCheck1 == 1) {
+  /* moves the linear motor [steps] number of steps in the given direction [dir] */
+  void moveSteps(int steps, int dir)
+  {
+    int num = 0;
+    if (dir == OPEN_DIR)
+    {
+      if (openDirCheck == 1)
+      {
+        digitalWrite(DIR_PIN, dir);
         digitalWrite(ENABLE_PIN, LOW);
-        digitalWrite(DIR_PIN, openDir);
-        while (numSteps < 2000) {
-          numSteps++;
-            for (int num2 = 0; num2 < 10; num2++) {
-              digitalWrite(STEP_PIN, HIGH);
-              delayMicroseconds(stepDelay);
-              digitalWrite(STEP_PIN, LOW);
-              delayMicroseconds(stepDelay);
-            }
+        while (num < steps)
+        {
+          num++;
+          for (int i = 0; i < 10; i++)
+          {
+            digitalWrite(STEP_PIN, HIGH);
+            delayMicroseconds(STEP_DELAY);
+            digitalWrite(STEP_PIN, LOW);
+            delayMicroseconds(STEP_DELAY);
+          }
         }
         digitalWrite(ENABLE_PIN, HIGH);
       }
     }
-    
- // Function to get loadcell reading  from loadcell object
-    double GetLoadCellReading() {
-      return loadcell.GetForce();
-    }
+    else if (dir == CLOSE_DIR)
+    {
+      if (closeDirCheck == 1)
+      {
+        digitalWrite(DIR_PIN, dir);
+        digitalWrite(ENABLE_PIN, LOW);
 
- // The function moves the linear motor [steps] number of steps in
- // the given direction [dir]
-    void MoveSteps(int steps, int dir) {
-      int num = 0;
-      if (dir == openDir) {
-        if (dirCheck1 == 1) {
-          digitalWrite(DIR_PIN, dir);
-          digitalWrite(ENABLE_PIN, LOW);
-          while (num < steps) {
-            num++;
-            for (int num2 = 0; num2 < 10; num2++) {
-              digitalWrite(STEP_PIN, HIGH);
-              delayMicroseconds(stepDelay);
-              digitalWrite(STEP_PIN, LOW);
-              delayMicroseconds(stepDelay);
-              
-            }
+        while (num < steps && (appliedForce < SAFETY_LIMIT))
+        {
+          num++;
+          for (int i = 0; i < 10; i++)
+          {
+            digitalWrite(STEP_PIN, HIGH);
+            delayMicroseconds(STEP_DELAY);
+            digitalWrite(STEP_PIN, LOW);
+            delayMicroseconds(STEP_DELAY);
           }
-          digitalWrite(ENABLE_PIN, HIGH);
+          appliedForce = loadCell.get_units();
         }
-      }
-      else if (dir == closeDir) {
-        if (dirCheck2 == 1) {
-          digitalWrite(DIR_PIN, dir);
-          digitalWrite(ENABLE_PIN, LOW);
-          while (num < steps&&(loadReading<SAFETY_LIMIT)) {  // Safety Limit SET
-            num++;
-            for (int num2 = 0; num2 < 10; num2++) {
-              digitalWrite(STEP_PIN, HIGH);
-              delayMicroseconds(stepDelay);
-              digitalWrite(STEP_PIN, LOW);
-              delayMicroseconds(stepDelay);
-              
-            }
-            loadReading=loadcell.GetForce();
-          }
-          digitalWrite(ENABLE_PIN, HIGH);
-        }
+        digitalWrite(ENABLE_PIN, HIGH);
       }
     }
+  }
 
-    
-    // Function for Stopping Linear Motor
-    // Used by ISR when end-stop tripped
-    void Disable() {
-      digitalWrite (ENABLE_PIN, HIGH);
-    }
+  /* manually disable movement in the linear motor */
+  void disable()
+  {
+    digitalWrite(ENABLE_PIN, HIGH);
+  }
 
-    // Function for manually enabling the linear motor
-    void Enable() {
-      digitalWrite (ENABLE_PIN,LOW);
-    }
+  /* manually enable movement in the linear motor */
+  void enable()
+  {
+    digitalWrite(ENABLE_PIN, LOW);
+  }
 
-    // Disabling/Enabling movement in a particular direction of motion
-    void DisableDir1() {
-      dirCheck1 = 0;
-    }
-    void DisableDir2() {
-      dirCheck2 = 0;;
-    }
-    void EnableDir1() {
-      dirCheck1 = 1;
-    }
-    void EnableDir2() {
-      dirCheck2 = 1;
-    }
+  /* disables motor movement in the opening direction */
+  void disableOpenDir()
+  {
+    openDirCheck = 0;
+  }
 
-   // Get raw data from load cell 
-   double GetLoadCellvolt(){
-      return loadcell.GetCal();
-    }
+  /* disables motor movement in the closing direction */
+  void disableCloseDir()
+  {
+    closeDirCheck = 0;
+    ;
+  }
 
+  /* enables motor movement in the opening direction */
+  void enableOpenDir()
+  {
+    openDirCheck = 1;
+  }
+
+  /* enables motor movement in the closing direction */
+  void enableCloseDir()
+  {
+    closeDirCheck = 1;
+  }
+
+  /* function to get calibrated force readings from load cell */
+  double getLoadCellForce()
+  {
+    return loadCell.get_units();
+  }
 };
