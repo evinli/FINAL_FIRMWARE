@@ -19,6 +19,7 @@
 #define CLOCKWISE 0
 #define COUNTER_CLOCKWISE 1
 
+
 class Gripper {
   /* create two roller motor objects */
   /*    original method would be to create an object directly, initialized by calling the 

@@ -50,8 +50,8 @@ Adafruit_VL6180X ToF2;
 Adafruit_VL6180X ToF3;
 
 /* create new gripper and LMotor objects */
-Gripper gripper;
-LinearMotor LMotor;
+Gripper gripper = Gripper();
+LinearMotor LMotor = LinearMotor();
 
 /* variable declarations */
 int sensorReadings[NUM_SENSORS]; /* for storing ToF sensor array readings */
