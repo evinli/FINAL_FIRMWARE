@@ -178,6 +178,5 @@ public:
   double getLoadCellForce()
   {
     return loadCell.get_units();
-    //return loadCell.get_value();
   }
 };

@@ -372,7 +372,7 @@ void loop()
       digitalWrite(TRIG_PIN, HIGH); /* sets the trigPin on HIGH state for 10 microseconds */
       delayMicroseconds(10);
       digitalWrite(TRIG_PIN, LOW);        /* pull the trigPin back to LOW state */
-      duration = pulseIn(ECHO_PIN, HIGH); /*reads the echoPin, returns the sound wave travel time in microseconds */
+      duration = pulseIn(ECHO_PIN, HIGH); /* reads the echoPin, returns the sound wave travel time in microseconds */
       distance = duration * 0.034 / 2;    /* calculates distance in cm */
       Serial.println(distance);
       delay(100);
