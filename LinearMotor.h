@@ -19,7 +19,7 @@
 #define NUM_STEPS 5000             /* pre-determined number for steps for opening the claw */
 #define SAFETY_LIMIT 100           /* in kg, set to smaller value once we have the load cell properly calibrated */
 #define STEP_DELAY 25              /* in microseconds, decrease delay to increase speed */
-#define CALIBRATION_FACTOR 2500000 /* calibration factor for the load cell */
+#define CALIBRATION_FACTOR 231000 /* calibration factor for the load cell */
 
 class LinearMotor
 {
@@ -41,8 +41,9 @@ class LinearMotor
       digitalWrite(ENABLE_PIN, HIGH); /* disable motor */
   
       loadCell.begin(LOAD_CELL_DATA, LOAD_CELL_CLOCK);
+      loadCell.set_gain(32);
       loadCell.set_scale(CALIBRATION_FACTOR);
-      loadCell.tare(); /* tare scale to 0 */
+      //loadCell.tare(); /* tare scale to 0, but not use for serial control since reading will be tared everytime when pressing L  */ 
     }
   
     /* closes the claw until a certain input force (in kg) measured by the load cell */
@@ -119,7 +120,7 @@ class LinearMotor
           digitalWrite(DIR_PIN, dir);
           digitalWrite(ENABLE_PIN, LOW);
   
-          while (num < steps && (appliedForce < SAFETY_LIMIT))
+          while (num < steps)
           {
             num++;
             for (int i = 0; i < 10; i++)
@@ -129,7 +130,7 @@ class LinearMotor
               digitalWrite(STEP_PIN, LOW);
               delayMicroseconds(STEP_DELAY);
             }
-            appliedForce = loadCell.get_units();
+            //appliedForce = loadCell.get_units();
           }
           digitalWrite(ENABLE_PIN, HIGH);
         }
@@ -158,7 +159,7 @@ class LinearMotor
     void disableCloseDir()
     {
       closeDirCheck = 0;
-      ;
+      
     }
   
     /* enables motor movement in the opening direction */
@@ -177,5 +178,6 @@ class LinearMotor
     double getLoadCellForce()
     {
       return loadCell.get_units();
+      //return loadCell.get_value();
     }
 };

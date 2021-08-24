@@ -31,9 +31,9 @@
 #define TOF2_CHANNEL 1
 #define TOF3_CHANNEL 2
 #define HEIGHT0 0  /* arbitrary baseline pleat height */
-#define HEIGHT1 50 /* arbitrary pleat height inside the claw */
-#define HEIGHT2 100
-#define HEIGHT3 150
+#define HEIGHT1 5 /* arbitrary pleat height inside the claw */
+#define HEIGHT2 10
+#define HEIGHT3 15
 #define TCAADDR 0x70 /* define I2C address for multiplexer */
 #define CLOCKWISE 0
 #define COUNTER_CLOCKWISE 1
@@ -42,7 +42,6 @@
 #define ROLLER_SPEED_DEFAULT 100   /* 100% PWM duty cycle */
 #define LOADING_FORCE 1.8          /* lower limit of optimal range for pleat loading */
 #define MIGRATING_FORCE 0.4        /* lower limit of optimal range for pleat migration */
-#define CALIBRATION_FACTOR 2500000 /* calibration factor for the load cell */
 
 /* create three new ToF sensor objects */
 Adafruit_VL6180X ToF1;
@@ -269,7 +268,7 @@ void loop()
   else if (serialData == '/')
   {
     while (!Serial.available())
-      ;
+    
     while (Serial.available())
     {
       c = Serial.read();
@@ -314,7 +313,7 @@ void loop()
     while (1)
     {
       Serial.print("Force reading (in kg): ");
-      Serial.print(LMotor.getLoadCellForce());
+      Serial.print(LMotor.getLoadCellForce()*0.4536/1.327-0.27,3); /* convert lb to kg and divide leverage ratio and minus offset */
       Serial.println();
     }
   }
@@ -345,6 +344,7 @@ void loop()
       pleatSlip = checkPleatSlipping(currentHeight, newHeight);
       Serial.print("Pleat height: ");
       Serial.print(newHeight);
+      Serial.print(" cm");      
       Serial.println();
       if (pleatSlip == 1)
       {
