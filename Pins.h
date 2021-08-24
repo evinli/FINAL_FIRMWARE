@@ -31,9 +31,9 @@
 /* end-stop sensor, have to be interruptable */
 #define ENDSTOP_PIN 2
 
-///* encoder pins, have to be interruptable */
-//#define FRONT_ENCODER_PIN 18
-//#define BACK_ENCODER_PIN 19
+/* encoder pins, have to be interruptable */
+#define FRONT_ENCODER_PIN 18
+#define BACK_ENCODER_PIN 19
 
 /* ultrasonic sensor */
 #define TRIG_PIN 10

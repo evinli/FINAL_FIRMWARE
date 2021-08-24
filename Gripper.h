@@ -21,14 +21,6 @@
 
 
 class Gripper {
-  /* create two roller motor objects */
-  /*    original method would be to create an object directly, initialized by calling the 
-   *    class constructor with the supplied parameters, but this keeps resulting in an error message...
-   *        eg. RollerMotor leftMotor(MOTOR_PWM_PIN_LEFT, MOTOR_A1_PIN_LEFT, MOTOR_B1_PIN_LEFT);
-   *        eg. RollerMotor rightMotor(MOTOR_PWM_PIN_RIGHT, MOTOR_A2_PIN_RIGHT, MOTOR_B2_PIN_RIGHT);
-   *    so, alternatively we are creating unnamed objects initialized as before and then copying it into 
-   *    named objects like leftMotor and rightMotor.
-   */
   RollerMotor leftMotor = RollerMotor(MOTOR_PWM_PIN_LEFT, MOTOR_A1_PIN_LEFT, MOTOR_B1_PIN_LEFT);
   RollerMotor rightMotor = RollerMotor(MOTOR_PWM_PIN_RIGHT, MOTOR_A2_PIN_RIGHT, MOTOR_B2_PIN_RIGHT);
     

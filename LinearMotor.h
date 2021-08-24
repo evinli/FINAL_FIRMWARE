@@ -4,7 +4,7 @@
  *               linear stepper motor. Note that there is a
  *               safety limit defined in this file that 
  *               prevents applying too much force on the 
- *               loadcell. 
+ *               load cell. 
  *               
  *  To-Do: Implement acceleration profile:
  *         CloseClaws(): Feedback control when force is within the optimal range 
@@ -16,9 +16,9 @@
 /* constants */
 #define OPEN_DIR 0
 #define CLOSE_DIR 1
-#define NUM_STEPS 5000             /* pre-determined number for steps for opening the claw */
-#define SAFETY_LIMIT 100           /* in kg, set to smaller value once we have the load cell properly calibrated */
-#define STEP_DELAY 25              /* in microseconds, decrease delay to increase speed */
+#define NUM_STEPS 5000 /* pre-determined number for steps for opening the claw */
+#define SAFETY_LIMIT 100 /* in kg, set to smaller value once we have the load cell properly calibrated */
+#define STEP_DELAY 25 /* in microseconds, decrease delay to increase speed */
 #define CALIBRATION_FACTOR 2500000 /* calibration factor for the load cell */
 
 class LinearMotor
@@ -28,7 +28,7 @@ class LinearMotor
 
   public:
     /* variable declarations */
-    int openDirCheck = 1;  /* enable movement in opening direction */
+    int openDirCheck = 1; /* enable movement in opening direction */
     int closeDirCheck = 1; /* enable movement in closing direction */
     double appliedForce;
   
@@ -114,12 +114,12 @@ class LinearMotor
       }
       else if (dir == CLOSE_DIR)
       {
+        int num = 0;
         if (closeDirCheck == 1)
         {
           digitalWrite(DIR_PIN, dir);
           digitalWrite(ENABLE_PIN, LOW);
-  
-          while (num < steps && (appliedForce < SAFETY_LIMIT))
+          while (num < steps)
           {
             num++;
             for (int i = 0; i < 10; i++)
@@ -129,7 +129,7 @@ class LinearMotor
               digitalWrite(STEP_PIN, LOW);
               delayMicroseconds(STEP_DELAY);
             }
-            appliedForce = loadCell.get_units();
+//            appliedForce = loadCell.get_units();
           }
           digitalWrite(ENABLE_PIN, HIGH);
         }
@@ -158,7 +158,6 @@ class LinearMotor
     void disableCloseDir()
     {
       closeDirCheck = 0;
-      ;
     }
   
     /* enables motor movement in the opening direction */

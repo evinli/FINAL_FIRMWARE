@@ -21,7 +21,7 @@
 /* include libraries */
 #include "Gripper.h"
 #include "LinearMotor.h"
-#include <Wire.h>
+#include "Wire.h"
 #include <Adafruit_VL6180X.h>
 
 /* constants */
@@ -30,24 +30,23 @@
 #define TOF1_CHANNEL 0
 #define TOF2_CHANNEL 1
 #define TOF3_CHANNEL 2
-#define HEIGHT0 0  /* arbitrary baseline pleat height */
-#define HEIGHT1 50 /* arbitrary pleat height inside the claw */
-#define HEIGHT2 100
-#define HEIGHT3 150
+#define HEIGHT0 0 /* arbitrary baseline pleat height */
+#define HEIGHT1 5 /* arbitrary pleat height inside the claw */
+#define HEIGHT2 10
+#define HEIGHT3 15
 #define TCAADDR 0x70 /* define I2C address for multiplexer */
 #define CLOCKWISE 0
 #define COUNTER_CLOCKWISE 1
 #define OPEN_DIR 0
 #define CLOSE_DIR 1
-#define ROLLER_SPEED_DEFAULT 100   /* 100% PWM duty cycle */
-#define LOADING_FORCE 1.8          /* lower limit of optimal range for pleat loading */
-#define MIGRATING_FORCE 0.4        /* lower limit of optimal range for pleat migration */
-#define CALIBRATION_FACTOR 2500000 /* calibration factor for the load cell */
+#define ROLLER_SPEED_DEFAULT 100 /* 100% PWM duty cycle */
+#define LOADING_FORCE 1.8 /* lower limit of optimal range for pleat loading */
+#define MIGRATING_FORCE 0.4 /* lower limit of optimal range for pleat migration */
 
 /* create three new ToF sensor objects */
-Adafruit_VL6180X ToF1;
-Adafruit_VL6180X ToF2;
-Adafruit_VL6180X ToF3;
+Adafruit_VL6180X ToF1 = Adafruit_VL6180X();
+Adafruit_VL6180X ToF2 = Adafruit_VL6180X();
+Adafruit_VL6180X ToF3 = Adafruit_VL6180X();
 
 /* create new gripper and LMotor objects */
 Gripper gripper = Gripper();
@@ -55,10 +54,10 @@ LinearMotor LMotor = LinearMotor();
 
 /* variable declarations */
 int sensorReadings[NUM_SENSORS]; /* for storing ToF sensor array readings */
-int currentIndex = HEIGHT0;      /* indexes refer to ToF sensors 1, 2, 3 respectively, each representing an arbitrary height */
-int currentHeight;               /* for storing current pleat height */
-int newHeight;                   /* for storing new pleat height */
-int pleatSlip;                   /* 0 or 1 for detecting whether  pleat has slipped */
+int currentIndex = HEIGHT0; /* indexes refer to ToF sensors 1, 2, 3 respectively, each representing an arbitrary height */
+int currentHeight; /* for storing current pleat height */
+int newHeight; /* for storing new pleat height */
+int pleatSlip; /* 0 or 1 for detecting whether pleat has slipped */
 
 byte serialData; /* for storing commands from the serial monitor */
 
@@ -82,7 +81,7 @@ double distance; /* stores distance from ultrasonic sensor */
 void setup()
 {
   Serial.begin(9600);
-  Wire.begin();              /* enable I2C protocol */
+  Wire.begin(); /* enable I2C protocol */
   analogReference(EXTERNAL); /* sets the ADC reference voltage to 2.5 V */
 
   /* initialize endstop pins */
@@ -231,8 +230,8 @@ void loop()
     while (Serial.available())
     {
       c = Serial.read(); /* reads one character from serial buffer */
-      readString += c;   /* appends character to a string */
-      delay(10);         /* slow looping to allow buffer to fill with next character */
+      readString += c; /* appends character to a string */
+      delay(10); /* slow looping to allow buffer to fill with next character */
     }
     n = readString.toInt(); /* converts string to an integer value */
     gripper.leftMotorControl(n, CLOCKWISE);
@@ -283,8 +282,7 @@ void loop()
   else if (serialData == '[')
   {
     /* getting the number of steps from the serial buffer for the linear motor */
-    while (!Serial.available())
-      ;
+    while (!Serial.available());
     while (Serial.available())
     {
       c = Serial.read();
@@ -297,8 +295,7 @@ void loop()
   }
   else if (serialData == ']')
   {
-    while (!Serial.available())
-      ;
+    while (!Serial.available());
     while (Serial.available())
     {
       c = Serial.read();
@@ -355,14 +352,14 @@ void loop()
     }
   }
   /* not in-use - encoder hasn't been integrated yet */
-  //  else if (serialData == 'T') {
-  //    while (1) {
-  //      if (current > 0) {
-  //        Serial.println(current);
-  //        delay(100);
-  //      }
-  //    }
-  //  }
+//  else if (serialData == 'T') {
+//    while (1) {
+//      if (current > 0) {
+//        Serial.println(current);
+//        delay(100);
+//      }
+//    }
+//  }
   else if (serialData == 'u')
   {
     while (1)
@@ -371,17 +368,17 @@ void loop()
       delayMicroseconds(2);
       digitalWrite(TRIG_PIN, HIGH); /* sets the trigPin on HIGH state for 10 microseconds */
       delayMicroseconds(10);
-      digitalWrite(TRIG_PIN, LOW);        /* pull the trigPin back to LOW state */
+      digitalWrite(TRIG_PIN, LOW); /* pull the trigPin back to LOW state */
       duration = pulseIn(ECHO_PIN, HIGH); /*reads the echoPin, returns the sound wave travel time in microseconds */
-      distance = duration * 0.034 / 2;    /* calculates distance in cm */
+      distance = duration * 0.034 / 2; /* calculates distance in cm */
       Serial.println(distance);
       delay(100);
     }
   }
   else if (serialData == 'I')
   {
-    gripper.rightMotorControl(100, COUNTER_CLOCKWISE);
-    gripper.leftMotorControl(100, CLOCKWISE);
+    gripper.rightMotorControl(5, COUNTER_CLOCKWISE);
+    gripper.leftMotorControl(5, CLOCKWISE);
   }
   else if (serialData == 'i')
   {
@@ -460,7 +457,7 @@ void tcaselect(uint8_t bus)
     return;
 
   Wire.beginTransmission(TCAADDR); /* transmit to multiplexer */
-  Wire.write(1 << bus);            /* send byte to select bus (0 - 7) */
+  Wire.write(1 << bus); /* send byte to select bus (0 - 7) */
   Wire.endTransmission();
 }
 
