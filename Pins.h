@@ -8,13 +8,13 @@
 #define __PINS__
 
 /* roller motors */
-#define MOTOR_PWM_PIN_LEFT 46
-#define MOTOR_A1_PIN_LEFT 47
-#define MOTOR_B1_PIN_LEFT 48
+#define MOTOR_PWM_PIN_RIGHT 46
+#define MOTOR_A1_PIN_RIGHT 47
+#define MOTOR_B1_PIN_RIGHT 48
 
-#define MOTOR_PWM_PIN_RIGHT 45
-#define MOTOR_A2_PIN_RIGHT 42
-#define MOTOR_B2_PIN_RIGHT 43
+#define MOTOR_PWM_PIN_LEFT 45
+#define MOTOR_A2_PIN_LEFT 42
+#define MOTOR_B2_PIN_LEFT 43
 
 /* linear stepper motor */
 #define STEP_PIN 13

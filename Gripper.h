@@ -21,8 +21,8 @@
 
 
 class Gripper {
-  RollerMotor leftMotor = RollerMotor(MOTOR_PWM_PIN_LEFT, MOTOR_A1_PIN_LEFT, MOTOR_B1_PIN_LEFT);
-  RollerMotor rightMotor = RollerMotor(MOTOR_PWM_PIN_RIGHT, MOTOR_A2_PIN_RIGHT, MOTOR_B2_PIN_RIGHT);
+  RollerMotor rightMotor = RollerMotor(MOTOR_PWM_PIN_RIGHT, MOTOR_A1_PIN_RIGHT, MOTOR_B1_PIN_RIGHT);
+  RollerMotor leftMotor = RollerMotor(MOTOR_PWM_PIN_LEFT, MOTOR_A2_PIN_LEFT, MOTOR_B2_PIN_LEFT);
     
   public:
     /* initializing the gripper */

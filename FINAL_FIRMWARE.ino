@@ -21,7 +21,7 @@
 /* include libraries */
 #include "Gripper.h"
 #include "LinearMotor.h"
-#include "Wire.h"
+#include <Wire.h>
 #include <Adafruit_VL6180X.h>
 
 /* constants */
@@ -40,8 +40,8 @@
 #define OPEN_DIR 0
 #define CLOSE_DIR 1
 #define ROLLER_SPEED_DEFAULT 100 /* 100% PWM duty cycle */
-#define LOADING_FORCE 1.8        /* lower limit of optimal range for pleat loading */
-#define MIGRATING_FORCE 0.4      /* lower limit of optimal range for pleat migration */
+#define LOADING_FORCE 1.8 /* lower limit of optimal range for pleat loading */
+#define MIGRATING_FORCE 0.4 /* lower limit of optimal range for pleat migration */
 
 /* create three new ToF sensor objects */
 Adafruit_VL6180X ToF1 = Adafruit_VL6180X();
@@ -54,10 +54,10 @@ LinearMotor LMotor = LinearMotor();
 
 /* variable declarations */
 int sensorReadings[NUM_SENSORS]; /* for storing ToF sensor array readings */
-int currentIndex = HEIGHT0;      /* indexes refer to ToF sensors 1, 2, 3 respectively, each representing an arbitrary height */
-int currentHeight;               /* for storing current pleat height */
-int newHeight;                   /* for storing new pleat height */
-int pleatSlip;                   /* 0 or 1 for detecting whether pleat has slipped */
+int currentIndex = HEIGHT0; /* indexes refer to ToF sensors 1, 2, 3 respectively, each representing an arbitrary height */
+int currentHeight; /* for storing current pleat height */
+int newHeight; /* for storing new pleat height */
+int pleatSlip; /* 0 or 1 for detecting whether pleat has slipped */
 
 byte serialData; /* for storing commands from the serial monitor */
 
@@ -81,7 +81,7 @@ double distance; /* stores distance from ultrasonic sensor */
 void setup()
 {
   Serial.begin(9600);
-  Wire.begin();              /* enable I2C protocol */
+  Wire.begin(); /* enable I2C protocol */
   analogReference(EXTERNAL); /* sets the ADC reference voltage to 2.5 V */
 
   /* initialize endstop pins */
@@ -230,8 +230,8 @@ void loop()
     while (Serial.available())
     {
       c = Serial.read(); /* reads one character from serial buffer */
-      readString += c;   /* appends character to a string */
-      delay(10);         /* slow looping to allow buffer to fill with next character */
+      readString += c; /* appends character to a string */
+      delay(10); /* slow looping to allow buffer to fill with next character */
     }
     n = readString.toInt(); /* converts string to an integer value */
     gripper.leftMotorControl(n, CLOCKWISE);
@@ -268,13 +268,13 @@ void loop()
   else if (serialData == '/')
   {
     while (!Serial.available())
-
-      while (Serial.available())
-      {
-        c = Serial.read();
-        readString += c;
-        delay(10);
-      }
+      ;
+    while (Serial.available())
+    {
+      c = Serial.read();
+      readString += c;
+      delay(10);
+    }
     n = readString.toInt();
     gripper.rightMotorControl(n, COUNTER_CLOCKWISE);
     readString = "";
@@ -282,8 +282,7 @@ void loop()
   else if (serialData == '[')
   {
     /* getting the number of steps from the serial buffer for the linear motor */
-    while (!Serial.available())
-      ;
+    while (!Serial.available());
     while (Serial.available())
     {
       c = Serial.read();
@@ -296,8 +295,7 @@ void loop()
   }
   else if (serialData == ']')
   {
-    while (!Serial.available())
-      ;
+    while (!Serial.available());
     while (Serial.available())
     {
       c = Serial.read();
@@ -313,7 +311,7 @@ void loop()
     while (1)
     {
       Serial.print("Force reading (in kg): ");
-      Serial.print(LMotor.getLoadCellForce() * 0.4536 / 1.327 - 0.27, 3); /* convert lb to kg and divide leverage ratio and minus offset */
+      Serial.print(LMotor.getLoadCellForce());
       Serial.println();
     }
   }
@@ -344,7 +342,6 @@ void loop()
       pleatSlip = checkPleatSlipping(currentHeight, newHeight);
       Serial.print("Pleat height: ");
       Serial.print(newHeight);
-      Serial.print(" cm");
       Serial.println();
       if (pleatSlip == 1)
       {
@@ -355,14 +352,14 @@ void loop()
     }
   }
   /* not in-use - encoder hasn't been integrated yet */
-  //  else if (serialData == 'T') {
-  //    while (1) {
-  //      if (current > 0) {
-  //        Serial.println(current);
-  //        delay(100);
-  //      }
-  //    }
-  //  }
+//  else if (serialData == 'T') {
+//    while (1) {
+//      if (current > 0) {
+//        Serial.println(current);
+//        delay(100);
+//      }
+//    }
+//  }
   else if (serialData == 'u')
   {
     while (1)
@@ -371,22 +368,22 @@ void loop()
       delayMicroseconds(2);
       digitalWrite(TRIG_PIN, HIGH); /* sets the trigPin on HIGH state for 10 microseconds */
       delayMicroseconds(10);
-      digitalWrite(TRIG_PIN, LOW);        /* pull the trigPin back to LOW state */
-      duration = pulseIn(ECHO_PIN, HIGH); /* reads the echoPin, returns the sound wave travel time in microseconds */
-      distance = duration * 0.034 / 2;    /* calculates distance in cm */
+      digitalWrite(TRIG_PIN, LOW); /* pull the trigPin back to LOW state */
+      duration = pulseIn(ECHO_PIN, HIGH); /*reads the echoPin, returns the sound wave travel time in microseconds */
+      distance = duration * 0.034 / 2; /* calculates distance in cm */
       Serial.println(distance);
       delay(100);
     }
   }
   else if (serialData == 'I')
   {
-    gripper.rightMotorControl(5, COUNTER_CLOCKWISE);
-    gripper.leftMotorControl(5, CLOCKWISE);
+    gripper.rightMotorControl(100, CLOCKWISE);
+    gripper.leftMotorControl(100, COUNTER_CLOCKWISE);
   }
   else if (serialData == 'i')
   {
-    gripper.rightMotorControl(100, CLOCKWISE);
-    gripper.leftMotorControl(100, COUNTER_CLOCKWISE);
+    gripper.rightMotorControl(100, COUNTER_CLOCKWISE);
+    gripper.leftMotorControl(100, CLOCKWISE);
   }
   else if (serialData == 'O')
   {
@@ -460,7 +457,7 @@ void tcaselect(uint8_t bus)
     return;
 
   Wire.beginTransmission(TCAADDR); /* transmit to multiplexer */
-  Wire.write(1 << bus);            /* send byte to select bus (0 - 7) */
+  Wire.write(1 << bus); /* send byte to select bus (0 - 7) */
   Wire.endTransmission();
 }
 
